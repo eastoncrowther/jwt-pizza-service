@@ -64,11 +64,7 @@ class DB {
         throw new StatusCodeError('unknown user', 404);
       }
 
-      const roleResult = await this.query(connection, `SELECT * FROM userRole WHERE userId=?`, [user.id]);
-      const roles = roleResult.map((r) => {
-        return { objectId: r.objectId || undefined, role: r.role };
-      });
-
+      const roles = await this.getRoles(connection, user.id);
       return { ...user, roles: roles, password: undefined };
     } finally {
       connection.end();
@@ -79,24 +75,43 @@ class DB {
     const connection = await this.getConnection();
     try {
       const params = [];
+      const values = [];
       if (password) {
         const hashedPassword = await bcrypt.hash(password, 10);
-        params.push(`password='${hashedPassword}'`);
+        params.push(`password=?`);
+        values.push(hashedPassword);
       }
       if (email) {
-        params.push(`email='${email}'`);
+        params.push(`email=?`);
+        values.push(email);
       }
       if (name) {
-        params.push(`name='${name}'`);
+        params.push(`name=?`);
+        values.push(name);
       }
       if (params.length > 0) {
-        const query = `UPDATE user SET ${params.join(', ')} WHERE id=${userId}`;
-        await this.query(connection, query);
+        const query = `UPDATE user SET ${params.join(', ')} WHERE id=?`;
+        await this.query(connection, query, [...values, userId]);
       }
-      return this.getUser(email, password);
+
+      const userResult = await this.query(connection, `SELECT * FROM user WHERE id=?`, [userId]);
+      const user = userResult[0];
+      if (!user) {
+        throw new StatusCodeError('unknown user', 404);
+      }
+
+      const roles = await this.getRoles(connection, user.id);
+      return { ...user, roles: roles, password: undefined };
     } finally {
       connection.end();
     }
+  }
+
+  async getRoles(connection, userId) {
+    const roleResult = await this.query(connection, `SELECT * FROM userRole WHERE userId=?`, [userId]);
+    return roleResult.map((r) => {
+      return { objectId: r.objectId || undefined, role: r.role };
+    });
   }
 
   async loginUser(userId, token) {
