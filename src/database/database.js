@@ -366,8 +366,14 @@ class DB {
           await connection.query(statement);
         }
 
-        if (!dbExists) {
-          const defaultAdmin = { name: '常用名字', email: 'a@jwt.com', password: 'admin', roles: [{ role: Role.Admin }] };
+        // Checking dbExists isn't reliable here: some MySQL setups (e.g. the
+        // MYSQL_DATABASE env var on the official Docker image) pre-create the
+        // schema empty before this ever runs, which would make dbExists true
+        // even though no tables or users exist yet. Check for the admin user
+        // directly instead.
+        const defaultAdmin = { name: '常用名字', email: 'a@jwt.com', password: 'admin', roles: [{ role: Role.Admin }] };
+        const adminResult = await this.query(connection, `SELECT id FROM user WHERE email=?`, [defaultAdmin.email]);
+        if (adminResult.length === 0) {
           await this.insertUser(connection, defaultAdmin);
         }
       } finally {
