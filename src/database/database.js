@@ -282,7 +282,7 @@ class DB {
     nameFilter = nameFilter.replace(/\*/g, '%');
 
     try {
-      let franchises = await this.query(connection, `SELECT id, name FROM franchise WHERE name LIKE ? LIMIT ${limit + 1} OFFSET ${offset}`, [nameFilter]);
+      let franchises = await this.query(connection, `SELECT id, name FROM franchise WHERE name LIKE ? ORDER BY id LIMIT ${limit + 1} OFFSET ${offset}`, [nameFilter]);
 
       const more = franchises.length > limit;
       if (more) {

@@ -52,6 +52,23 @@ test('list franchises ignores non-numeric paging values', async () => {
   expect(res.body.franchises.length).toBeLessThanOrEqual(1);
 });
 
+test('list franchises returns oldest franchises first', async () => {
+  const { token: adminToken } = await loginAdmin();
+  const { user } = await registerDiner();
+  const tag = Math.random().toString(36).substring(2, 12);
+  // Created in reverse alphabetical order so name order and id order differ
+  for (const prefix of ['zulu', 'mike', 'alpha']) {
+    await request(app)
+      .post('/api/franchise')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ name: `${prefix} ${tag}`, admins: [{ email: user.email }] });
+  }
+
+  const res = await request(app).get(`/api/franchise?name=*${tag}`);
+  expect(res.status).toBe(200);
+  expect(res.body.franchises.map((f) => f.name)).toEqual([`zulu ${tag}`, `mike ${tag}`, `alpha ${tag}`]);
+});
+
 test('create franchise requires admin', async () => {
   const { token } = await registerDiner();
   const res = await request(app).post('/api/franchise').set('Authorization', `Bearer ${token}`).send({ name: 'nope', admins: [] });
