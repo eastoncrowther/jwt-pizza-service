@@ -114,6 +114,54 @@ class DB {
     }
   }
 
+  async getUsers(page = 0, limit = 10, nameFilter = '*') {
+    const connection = await this.getConnection();
+
+    page = Math.max(0, parseInt(page) || 0);
+    limit = Math.max(1, parseInt(limit) || 10);
+    const offset = page * limit;
+    nameFilter = nameFilter.replace(/\*/g, '%');
+
+    try {
+      let users = await this.query(connection, `SELECT id, name, email FROM user WHERE name LIKE ? ORDER BY id LIMIT ${limit + 1} OFFSET ${offset}`, [nameFilter]);
+
+      const more = users.length > limit;
+      if (more) {
+        users = users.slice(0, limit);
+      }
+
+      for (const user of users) {
+        user.roles = await this.getRoles(connection, user.id);
+      }
+      return [users, more];
+    } finally {
+      connection.end();
+    }
+  }
+
+  async deleteUser(userId) {
+    const connection = await this.getConnection();
+    try {
+      const userResult = await this.query(connection, `SELECT id FROM user WHERE id=?`, [userId]);
+      if (userResult.length === 0) {
+        throw new StatusCodeError('unknown user', 404);
+      }
+
+      await connection.beginTransaction();
+      try {
+        await this.query(connection, `DELETE FROM auth WHERE userId=?`, [userId]);
+        await this.query(connection, `DELETE FROM userRole WHERE userId=?`, [userId]);
+        await this.query(connection, `DELETE FROM user WHERE id=?`, [userId]);
+        await connection.commit();
+      } catch {
+        await connection.rollback();
+        throw new StatusCodeError('unable to delete user', 500);
+      }
+    } finally {
+      connection.end();
+    }
+  }
+
   async getRoles(connection, userId) {
     const roleResult = await this.query(connection, `SELECT * FROM userRole WHERE userId=?`, [userId]);
     return roleResult.map((r) => {
@@ -228,6 +276,8 @@ class DB {
   async getFranchises(authUser, page = 0, limit = 10, nameFilter = '*') {
     const connection = await this.getConnection();
 
+    page = Math.max(0, parseInt(page) || 0);
+    limit = Math.max(1, parseInt(limit) || 10);
     const offset = page * limit;
     nameFilter = nameFilter.replace(/\*/g, '%');
 

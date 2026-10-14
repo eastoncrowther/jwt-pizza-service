@@ -23,6 +23,35 @@ test('list franchises as admin', async () => {
   expect(Array.isArray(res.body.franchises)).toBe(true);
 });
 
+test('list franchises respects limit and pagination', async () => {
+  const { token: adminToken } = await loginAdmin();
+  const { user } = await registerDiner();
+  const tag = Math.random().toString(36).substring(2, 12);
+  for (let i = 0; i < 3; i++) {
+    await request(app)
+      .post('/api/franchise')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ name: `page ${tag} ${i}`, admins: [{ email: user.email }] });
+  }
+  const list = (page) => request(app).get(`/api/franchise?page=${page}&limit=2&name=*${tag}*`);
+
+  const first = await list(0);
+  expect(first.status).toBe(200);
+  expect(first.body.franchises.length).toBe(2);
+  expect(first.body.more).toBe(true);
+
+  const second = await list(1);
+  expect(second.body.franchises.length).toBe(1);
+  expect(second.body.more).toBe(false);
+});
+
+test('list franchises ignores non-numeric paging values', async () => {
+  const res = await request(app).get('/api/franchise?page=abc&limit=1%20OFFSET%200');
+  expect(res.status).toBe(200);
+  expect(Array.isArray(res.body.franchises)).toBe(true);
+  expect(res.body.franchises.length).toBeLessThanOrEqual(1);
+});
+
 test('create franchise requires admin', async () => {
   const { token } = await registerDiner();
   const res = await request(app).post('/api/franchise').set('Authorization', `Bearer ${token}`).send({ name: 'nope', admins: [] });
