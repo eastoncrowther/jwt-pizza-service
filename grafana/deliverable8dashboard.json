@@ -150,7 +150,7 @@
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "sum by (method) (rate(http_requests_total{source=\"$source\", method!=\"ALL\"}[1m])) * 60",
+          "expr": "sum by (method) (rate(http_requests_total{source=\"jwt-pizza-service\", method!=\"ALL\"}[1m])) * 60",
           "interval": "10s",
           "legendFormat": "{{method}}",
           "range": true,
@@ -161,7 +161,7 @@
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "sum(rate(http_requests_total{source=\"$source\", method=\"ALL\"}[1m])) * 60",
+          "expr": "sum(rate(http_requests_total{source=\"jwt-pizza-service\", method=\"ALL\"}[1m])) * 60",
           "interval": "10s",
           "legendFormat": "Total",
           "range": true,
@@ -229,7 +229,7 @@
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "max(active_users{source=\"$source\"})",
+          "expr": "max(active_users{source=\"jwt-pizza-service\"})",
           "interval": "10s",
           "legendFormat": "Active users",
           "range": true,
@@ -323,7 +323,7 @@
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "sum by (status) (rate(auth_attempts_total{source=\"$source\"}[1m])) * 60",
+          "expr": "sum by (status) (rate(auth_attempts_total{source=\"jwt-pizza-service\"}[1m])) * 60",
           "interval": "10s",
           "legendFormat": "{{status}}",
           "range": true,
@@ -439,7 +439,7 @@
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "avg(cpu_percent{source=\"$source\"})",
+          "expr": "avg(cpu_percent{source=\"jwt-pizza-service\"})",
           "interval": "10s",
           "legendFormat": "CPU",
           "range": true,
@@ -450,7 +450,7 @@
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "avg(memory_percent{source=\"$source\"})",
+          "expr": "avg(memory_percent{source=\"jwt-pizza-service\"})",
           "interval": "10s",
           "legendFormat": "Memory",
           "range": true,
@@ -544,7 +544,7 @@
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "sum(rate(pizzas_sold_total{source=\"$source\"}[1m])) * 60",
+          "expr": "sum(rate(pizzas_sold_total{source=\"jwt-pizza-service\"}[1m])) * 60",
           "interval": "10s",
           "legendFormat": "Sold",
           "range": true,
@@ -555,7 +555,7 @@
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "sum(rate(pizza_creation_failures_total{source=\"$source\"}[1m])) * 60",
+          "expr": "sum(rate(pizza_creation_failures_total{source=\"jwt-pizza-service\"}[1m])) * 60",
           "interval": "10s",
           "legendFormat": "Creation failures",
           "range": true,
@@ -636,7 +636,7 @@
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "sum(rate(pizza_revenue_total{source=\"$source\"}[1m])) * 60",
+          "expr": "sum(rate(pizza_revenue_total{source=\"jwt-pizza-service\"}[1m])) * 60",
           "interval": "10s",
           "legendFormat": "Revenue",
           "range": true,
@@ -750,7 +750,7 @@
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "avg(service_latency_milliseconds{source=\"$source\"})",
+          "expr": "avg(service_latency_milliseconds{source=\"jwt-pizza-service\"})",
           "interval": "10s",
           "legendFormat": "Service endpoint",
           "range": true,
@@ -761,7 +761,7 @@
             "type": "prometheus",
             "uid": "grafanacloud-prom"
           },
-          "expr": "avg(pizza_creation_latency_milliseconds{source=\"$source\"})",
+          "expr": "avg(pizza_creation_latency_milliseconds{source=\"jwt-pizza-service\"})",
           "interval": "10s",
           "legendFormat": "Pizza creation",
           "range": true,
@@ -778,31 +778,7 @@
     "jwt-pizza"
   ],
   "templating": {
-    "list": [
-      {
-        "current": {
-          "selected": true,
-          "text": "jwt-pizza-service",
-          "value": "jwt-pizza-service"
-        },
-        "label": "Source",
-        "name": "source",
-        "options": [
-          {
-            "selected": true,
-            "text": "jwt-pizza-service",
-            "value": "jwt-pizza-service"
-          },
-          {
-            "selected": false,
-            "text": "jwt-pizza-service-dev",
-            "value": "jwt-pizza-service-dev"
-          }
-        ],
-        "query": "jwt-pizza-service,jwt-pizza-service-dev",
-        "type": "custom"
-      }
-    ]
+    "list": []
   },
   "time": {
     "from": "2026-11-10T05:42:00.000Z",
@@ -812,6 +788,6 @@
   "timezone": "",
   "title": "JWT Pizza Service",
   "uid": "jwt-pizza-service",
-  "version": 6,
+  "version": 7,
   "weekStart": ""
 }
